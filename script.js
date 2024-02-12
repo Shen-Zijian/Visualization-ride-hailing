@@ -17,68 +17,49 @@ L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
 //meeting point
 var pulsingIcon = L.icon.pulse({iconSize:[10,10],color:'red'});
 
-// fetch('meeting_point.json')
-//     .then(response => response.json())
-//     .then(station_data => {
-//         for (var id in station_data) {
-//             // console.log(id,station_data[id][0][0])
-//             var station = station_data[id];
-//             var bus_station = L.marker([station[0][0], station[0][1]], {icon: pulsingIcon}).addTo(mymap);
-//             (function(id) {
-//                 bus_station.on('click', function() {
-//                     var infoDiv = document.getElementById('info');
-//                     infoDiv.innerText = 'Meeting Point: ' + id;
-//                 });
-//             })(id);
-//         }
-//     });
-
 
 // 图例
-fetch('2_2.json')
+fetch('fukingbug.json')
     .then(response => response.json())
     .then(data => {
-        // 颜色选项
-        var colors_bar = {"rider":'#FF0000', "taxi":'#00FF00', "bus":'#FFFF00', "other":'#00FFFF'};
-        // var colors = ['#FF0000', '#00FF00', '#0000FF', '#FF00FF', '#00FFFF', '#FFFF00', '#FFFFFF'];
-        var legend = L.control({position: 'topleft'});
-        legend.onAdd = function (map) {
-    var div = L.DomUtil.create('div', 'info legend');
-    // 添加白色背景并添加一些padding
-    div.style.backgroundColor = '#333333';
-    div.style.padding = '10px';
-    div.style.color = 'white';
-    // div.innerHTML += "<h4>Legend</h4>";
+    var legend = L.control({position: 'topleft'});
+    legend.onAdd = function (map) {
+        var div = L.DomUtil.create('div', 'info legend');
+        div.style.backgroundColor = '#333333';
+        div.style.padding = '10px';
+        div.style.color = 'white';
 
-    // for (var vehicleType in colors_bar) {
-    //     div.innerHTML +=
-    //         '<i style="background:' + colors_bar[vehicleType] + '; width: 6px; height: 6px; display: inline-block; border-radius: 50%;"></i> ' +'  ' +
-    //         vehicleType + '<br>';
-    // }
-    div.innerHTML +=
-        '<img src="./img/taxi_pickup.png" width="17" height="30"> Taxi (cruise) <br>';
-    div.innerHTML +=
-        '<img src="./img/shuttle_bus.png" width="15" height="25"> Taxi (waiting) <br>';
+        // 创建一个图例项的函数
+        function addLegendItem(src, width, height, text) {
+            var itemDiv = L.DomUtil.create('div', '', div);
+            itemDiv.style.display = 'flex';
+            itemDiv.style.alignItems = 'center';
+            itemDiv.style.justifyContent = 'flex-start';
+            itemDiv.style.marginBottom = '5px'; // 确保图例项之间有间距
 
-    div.innerHTML +=
-        '<img src="./img/other.png" width="15" height="25"> Taxi (pickup) <br>';
+            var icon = L.DomUtil.create('img', '', itemDiv);
+            icon.src = src;
+            icon.width = width;
+            icon.height = height;
+            icon.style.marginRight = '5px'; // 确保图标和文本之间有间距
 
-    div.innerHTML +=
-        '<img src="./img/taxi.png" width="20" height="25"> Taxi (onboard) <br>';
+            var textDiv = L.DomUtil.create('div', '', itemDiv);
+            textDiv.style.flexGrow = '1';
+            textDiv.innerHTML = text;
+            textDiv.style.textAlign = 'center';
+        }
 
-    div.innerHTML +=
-        '<img src="./img/waiting_rider.png" width="15" height="20"> Rider (waiting) <br>';
+        // 添加各个图例项
+        addLegendItem('./img/taxi_pickup.png', 17, 30, 'Taxi (cruise)');
+        addLegendItem('./img/shuttle_bus.png', 15, 25, 'Taxi (waiting)');
+        addLegendItem('./img/other.png', 15, 25, 'Taxi (pickup)');
+        addLegendItem('./img/taxi.png', 20, 25, 'Taxi (onboard)');
+        addLegendItem('./img/waiting_rider.png', 15, 20, 'Rider (waiting)');
+        addLegendItem('./img/walking_rider.png', 20, 20, 'Rider (walking)');
+        addLegendItem('./img/onboard_rider.png', 25, 20, 'Rider (onboard)');
+        addLegendItem('./img/meeting_point.png', 20, 20, 'Meeting Point');
 
-    div.innerHTML +=
-        '<img src="./img/walking_rider.png" width="20" height="20"> Rider (walking) <br>';
-
-    div.innerHTML +=
-        '<img src="./img/onboard_rider.png" width="25" height="20"> Rider (onboard) <br>';
-
-    div.innerHTML +=
-
-        '<img src="./img/meeting_point.png" width="20" height="20"> Meeting Point';
-    return div;
+        return div;
 };
 legend.addTo(mymap);
 
@@ -277,17 +258,6 @@ setInterval(function() {
         // 移动到下一个点，移动时间为20000毫秒
         infoControl.update(data[routeID][0]);
         var marker = markers[routeID];
-        // console.log(data[routeID][0])
-        // if (routeID === '5_70_rider_41'){
-        //         console.log(routeID,data[routeID][0])
-        //     }
-        //      if (routeID === '5_70_driver_20'){
-        //         console.log(routeID,data[routeID][0])
-        //     }
-       
-        // if (data[routeID][0][3] !== data[routeID][1][3]) {
-            // 状态发生变化，选择新的图标
-        // console.log(data)
         if (data[routeID][0][2] === 'rider') {
             switch (data[routeID][0][3]) { // 使用数组的第三个元素（类型）来选择图标
                 case 'wait':
@@ -331,18 +301,6 @@ setInterval(function() {
             }
         }
         markers[routeID].setIcon(vehicon);
-        // data[routeID].push(data[routeID].shift());  // 将刚用过的点移到数组的末尾，以便下次使用
-        // data[routeID].shift();
-
-        // 计算角度并设置旋转
-        // var angle = calculateAngle(oldPos, newPos);
-        // if (angle !== 0 && data[routeID][0][2] !== 'rider') {
-        //     markers[routeID].setRotationAngle(angle); // 设置图标旋转角度
-        // }
-        //
-        // // 移动marker到新位置
-        // markers[routeID].moveTo(newPos, interval);
-        // markers[routeID].start();
         if (data[routeID].length > 1) {
             var newPos = [data[routeID][1][0], data[routeID][1][1]];
 
@@ -370,16 +328,3 @@ setInterval(function() {
 }, 500);
 });
 
-
-
-// 创建一个脉冲图标
-
-// 创建标记并添加到地图上
-// L.marker([40.743132, -73.9893927], {icon: pulseIcon}).addTo(mymap);
-// {
-//     1:{car1:speed1,car2:speed2},
-//
-//     2:{car1:speed3,car2:speed4},
-//
-//     time3:{car2:speed5,}
-// }
